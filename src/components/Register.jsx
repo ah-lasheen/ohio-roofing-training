@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import logo from '../assets/images/logo/Logo.PNG'
 import './Auth.css'
 
 export default function Register() {
@@ -19,6 +20,12 @@ export default function Register() {
     e.preventDefault()
     setError('')
 
+    // Validate all fields before setting loading state
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('First name and last name are required')
+      return
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match')
       return
@@ -29,13 +36,7 @@ export default function Register() {
       return
     }
 
-    setLoading(true)
-
-    if (!firstName.trim() || !lastName.trim()) {
-      setError('First name and last name are required')
-      return
-    }
-
+    // Only set loading after all validations pass
     setLoading(true)
 
     try {
@@ -63,8 +64,7 @@ export default function Register() {
       }
 
       // Show success message and redirect to login
-      // Note: If email confirmation is disabled in Supabase, users can log in immediately
-      alert('Registration successful! You can now log in.')
+      alert('Registration successful! Please check your email to verify your account.')
       navigate('/login')
     } catch (err) {
       setError(err.message || 'Failed to register')
@@ -76,7 +76,7 @@ export default function Register() {
   return (
     <div className="auth-container">
       <div className="auth-logo">
-        <div className="auth-logo-placeholder">LOGO</div>
+        <img src={logo} alt="Company Logo" />
       </div>
       <div className="auth-card">
         <h1>Register</h1>
@@ -158,4 +158,3 @@ export default function Register() {
     </div>
   )
 }
-

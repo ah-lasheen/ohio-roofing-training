@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import logo from '../assets/images/logo/Logo.PNG'
 import './Auth.css'
 
 export default function Login() {
@@ -32,7 +33,7 @@ export default function Login() {
   return (
     <div className="auth-container">
       <div className="auth-logo">
-        <div className="auth-logo-placeholder">LOGO</div>
+        <img src={logo} alt="Company Logo" />
       </div>
       <div className="auth-card">
         <h1>Login</h1>
