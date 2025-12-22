@@ -30,7 +30,15 @@ export default function AdminDashboard() {
         .select('id, email, first_name, last_name, role, created_at')
         .order('created_at', { ascending: false })
 
-      if (usersError) throw usersError
+      if (usersError) {
+        // Handle 404 or table not found errors gracefully
+        if (usersError.code === 'NOT_FOUND' || usersError.status === 404 || usersError.message?.includes('does not exist')) {
+          console.error('User profiles table not found. Please run complete-database-setup.sql in Supabase.')
+          setUsers([])
+          return
+        }
+        throw usersError
+      }
 
       // Fetch all quiz attempts to calculate highest scores
       const { data: quizData, error: quizError } = await supabase
@@ -107,7 +115,15 @@ export default function AdminDashboard() {
         .eq('month_year', currentMonth)
         .order('amount', { ascending: false })
 
-      if (earningsError) throw earningsError
+      if (earningsError) {
+        // Handle 404 or table not found errors gracefully
+        if (earningsError.code === 'NOT_FOUND' || earningsError.status === 404 || earningsError.message?.includes('does not exist')) {
+          console.warn('Leaderboard table not found. Please run complete-database-setup.sql in Supabase.')
+          setLeaderboardData([])
+          return
+        }
+        throw earningsError
+      }
 
       if (!earningsData || earningsData.length === 0) {
         setLeaderboardData([])

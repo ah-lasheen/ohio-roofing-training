@@ -106,7 +106,16 @@ export default function UserDashboard() {
         .eq('month_year', currentMonth)
         .order('amount', { ascending: false })
 
-      if (earningsError) throw earningsError
+      if (earningsError) {
+        // Handle 404 or table not found errors gracefully
+        if (earningsError.code === 'NOT_FOUND' || earningsError.status === 404 || earningsError.message?.includes('does not exist')) {
+          console.warn('Leaderboard table not found. Please run complete-database-setup.sql in Supabase.')
+          setLeaderboardData([])
+          setUserEarnings(0)
+          return
+        }
+        throw earningsError
+      }
 
       if (!earningsData || earningsData.length === 0) {
         setLeaderboardData([])
@@ -122,7 +131,12 @@ export default function UserDashboard() {
         .in('id', userIds)
 
       if (profilesError) {
-        console.error('Error fetching user profiles:', profilesError)
+        // Handle 404 or table not found errors gracefully
+        if (profilesError.code === 'NOT_FOUND' || profilesError.status === 404 || profilesError.message?.includes('does not exist')) {
+          console.warn('User profiles table not found. Please run complete-database-setup.sql in Supabase.')
+        } else {
+          console.error('Error fetching user profiles:', profilesError)
+        }
       }
 
       // Create a map of user_id to profile
