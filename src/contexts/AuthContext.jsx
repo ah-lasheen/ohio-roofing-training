@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         .from('user_profiles')
         .select('role, first_name, last_name, email')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
       
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
@@ -43,8 +43,8 @@ export const AuthProvider = ({ children }) => {
       
       if (error) {
         console.error('Error fetching user profile from database:', error)
-        // Only default to trainee if it's a NOT FOUND error
-        if (error.code === 'PGRST116') {
+        // Only default to trainee if it's a NOT FOUND error (handle multiple error codes)
+        if (error.code === 'PGRST116' || error.code === 'NOT_FOUND' || error.status === 404) {
           console.warn('User profile not found, defaulting to trainee')
           setUserRole('trainee')
           setUserProfile(null)

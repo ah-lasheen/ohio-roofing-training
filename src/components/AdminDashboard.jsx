@@ -254,7 +254,15 @@ export default function AdminDashboard() {
         user_id_to_delete: userId
       })
 
-      if (error) throw error
+      if (error) {
+        // Check if function doesn't exist (404 error)
+        if (error.code === 'NOT_FOUND' || error.status === 404 || error.message?.includes('function') || error.message?.includes('does not exist')) {
+          console.error('Delete user function not found. Please run delete-user-function.sql in Supabase.')
+          alert('Delete function not found. Please ensure delete-user-function.sql has been run in Supabase SQL Editor.')
+          throw error
+        }
+        throw error
+      }
 
       // Refresh user list
       await fetchUsers()

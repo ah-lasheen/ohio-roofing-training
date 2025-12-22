@@ -42,32 +42,38 @@ export default function UserDashboard() {
     if (!user) return
     try {
       setLoadingQuizData(true)
-      // Fetch last quiz attempt
+      // Fetch last quiz attempt - use maybeSingle() to avoid 404 errors when no rows exist
       const { data: lastAttempt, error: lastError } = await supabase
         .from('quiz_attempts')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
-      if (lastError && lastError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-        console.error('Error fetching quiz attempt:', lastError)
+      if (lastError) {
+        // Only log if it's not a "not found" error
+        if (lastError.code !== 'PGRST116' && lastError.code !== 'NOT_FOUND' && lastError.status !== 404) {
+          console.error('Error fetching quiz attempt:', lastError)
+        }
       } else if (lastAttempt) {
         setLastQuizAttempt(lastAttempt)
       }
 
-      // Fetch highest quiz score
+      // Fetch highest quiz score - use maybeSingle() to avoid 404 errors when no rows exist
       const { data: allAttempts, error: attemptsError } = await supabase
         .from('quiz_attempts')
         .select('score')
         .eq('user_id', user.id)
         .order('score', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
-      if (attemptsError && attemptsError.code !== 'PGRST116') {
-        console.error('Error fetching highest score:', attemptsError)
+      if (attemptsError) {
+        // Only log if it's not a "not found" error
+        if (attemptsError.code !== 'PGRST116' && attemptsError.code !== 'NOT_FOUND' && attemptsError.status !== 404) {
+          console.error('Error fetching highest score:', attemptsError)
+        }
       } else if (allAttempts) {
         setHighestQuizScore(allAttempts.score)
       } else {
@@ -461,7 +467,7 @@ export default function UserDashboard() {
           answers: quizAnswers
         })
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) throw error
 
